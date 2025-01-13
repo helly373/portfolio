@@ -6,8 +6,13 @@ const Navbar = () => {
 
   const navItems = ['home', 'skills', 'projects', 'contact'];
 
+  const handleScroll = (section) => {
+    setCurrentPage(section);
+    document.getElementById(section).scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <nav className="relative w-full top-0 bg-[#1b4339] shadow-md z-50 overflow-hidden">
+    <nav className="sticky top-0 z-50 bg-[#1b4339] shadow-md">
       <div className="fog-effect"></div>
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -19,13 +24,12 @@ const Navbar = () => {
             {navItems.map((item) => (
               <button
                 key={item}
-                onClick={() => setCurrentPage(item)}
-                className={`px-4 py-3 text-sm font-medium capitalize flex-1 sm:flex-none transition-transform duration-300 hover:scale-110
-                  ${
-                    currentPage === item
-                      ? "text-[#c8fad0] border-b-2 border-[#c8fad0] bg-[#52b788] sm:bg-transparent"
-                      : "text-[#c8fad0]"
-                  }`}
+                onClick={() => handleScroll(item)}
+                className={`px-4 py-3 text-sm font-medium capitalize flex-1 sm:flex-none transition-transform duration-300 hover:scale-110 ${
+                  currentPage === item
+                    ? 'text-[#c8fad0] border-b-2 border-[#c8fad0] bg-[#52b788] sm:bg-transparent'
+                    : 'text-[#c8fad0]'
+                }`}
               >
                 {item}
               </button>
