@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 const createHexagonPoints = (centerX, centerY, size) => {
   const points = [];
   for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i;
+    const angle = (Math.PI / 3) * i - Math.PI / 6;
     const x = centerX + size * Math.cos(angle);
     const y = centerY + size * Math.sin(angle);
     points.push(`${x},${y}`);
@@ -13,176 +13,208 @@ const createHexagonPoints = (centerX, centerY, size) => {
   return points.join(' ');
 };
 
-// Define skills with their connections and positions
+const getHexagonEdgePoint = (centerX, centerY, size, edge) => {
+  const angleMap = {
+    top: -Math.PI / 2, // Top point
+    bottom: Math.PI / 2, // Bottom point
+  };
+  const angle = angleMap[edge];
+  return {
+    x: centerX + size * Math.cos(angle),
+    y: centerY + size * Math.sin(angle),
+  };
+};
+
+
+// Calculate positions in a hexagonal pattern
+const calculatePosition = (centerX, centerY, index, totalItems, radius) => {
+  const angle = (2 * Math.PI * index) / totalItems - Math.PI / 2;
+  return {
+    x: centerX + radius * Math.cos(angle),
+    y: centerY + radius * Math.sin(angle)
+  };
+};
+
+// Updated skills data with hierarchical structure
 const skillsData = {
   core: {
-    id: 'webdev',
-    name: 'Web Development',
-    x: 400,
-    y: 300,
-    connections: ['frontend', 'backend', 'tools'],
-    size: 45
+    id: 'skills',
+    name: 'Skills',
+    x: 600,
+    y: 600,
+    connections: ['frontend', 'backend', 'database', 'devops'],
+    size: 100
   },
-  skills: [
+  categories: [
     {
       id: 'frontend',
       name: 'Frontend',
-      icon: '🎨',
-      x: 250,
-      y: 200,
-      connections: ['html', 'css', 'js'],
-      description: 'Building responsive and interactive user interfaces',
-      size: 35
+      size: 75,
+      skills: [
+        { id: 'react', name: 'React.js', level: 85 },
+        { id: 'tailwind', name: 'Tailwind', level: 85},
+        { id: 'bootstrap', name: 'Bootstrap', level: 80}
+      ]
     },
     {
       id: 'backend',
       name: 'Backend',
-      icon: '⚙️',
-      x: 550,
-      y: 200,
-      connections: ['nodejs', 'db'],
-      description: 'Server-side development and API integration',
-      size: 35
+      size: 75,
+      skills: [
+        { id: 'node', name: 'Node.js', level: 90 },
+        { id: 'java', name: 'Java', level: 85 },
+        { id: 'c#', name: 'C#', level: 88 }
+      ]
     },
     {
-      id: 'html',
-      name: 'HTML5',
-      icon: '🌐',
-      x: 150,
-      y: 100,
-      level: 90,
-      description: 'Semantic markup and accessibility',
-      size: 30
+      id: 'database',
+      name: 'Database',
+      size: 75,
+      skills: [
+        { id: 'mysql', name: 'MySQL', level: 90},
+        { id: 'mongodb', name: 'MongoDB', level: 80},
+        { id: 'postgresql', name: 'PostgreSQL', level: 85}
+      ]
     },
     {
-      id: 'css',
-      name: 'CSS3',
-      icon: '🎨',
-      x: 250,
-      y: 100,
-      level: 85,
-      description: 'Styling and responsive design',
-      size: 30
-    },
-    {
-      id: 'js',
-      name: 'JavaScript',
-      icon: '📜',
-      x: 350,
-      y: 100,
-      level: 88,
-      description: 'Modern ES6+ and frameworks',
-      size: 30
-    },
-    {
-      id: 'nodejs',
-      name: 'Node.js',
-      icon: '🌳',
-      x: 500,
-      y: 100,
-      level: 80,
-      description: 'Server-side JavaScript',
-      size: 30
-    },
-    {
-      id: 'db',
-      name: 'Databases',
-      icon: '💾',
-      x: 600,
-      y: 100,
-      level: 75,
-      description: 'SQL and NoSQL databases',
-      size: 30
-    },
-    {
-      id: 'tools',
-      name: 'DevTools',
-      icon: '🔧',
-      x: 400,
-      y: 400,
-      connections: ['git', 'docker'],
-      description: 'Development and deployment tools',
-      size: 35
-    },
-    {
-      id: 'git',
-      name: 'Git',
-      icon: '📚',
-      x: 350,
-      y: 500,
-      level: 88,
-      description: 'Version control and collaboration',
-      size: 30
-    },
-    {
-      id: 'docker',
-      name: 'Docker',
-      icon: '🐳',
-      x: 450,
-      y: 500,
-      level: 75,
-      description: 'Containerization and deployment',
-      size: 30
+      id: 'devops',
+      name: 'DevOps',
+      size: 75,
+      skills: [
+        { id: 'docker', name: 'Docker', level: 75},
+        { id: 'azure', name: 'Azure', level: 70},
+        { id: 'vercel', name: 'Vercel', level: 65}
+      ]
     }
   ]
 };
 
+// Calculate positions for all elements
+const processSkillsData = () => {
+  // Set positions for categories in an "X" shape
+  skillsData.categories = skillsData.categories.map((category, index) => {
+    let pos;
+
+    if (index === 0) {
+      // Top-Left Quadrant
+      pos = { x: skillsData.core.x - 300, y: skillsData.core.y - 300 };
+    } else if (index === 1) {
+      // Top-Right Quadrant
+      pos = { x: skillsData.core.x + 300, y: skillsData.core.y - 300 };
+    } else if (index === 2) {
+      // Bottom-Left Quadrant
+      pos = { x: skillsData.core.x - 300, y: skillsData.core.y + 300 };
+    } else if (index === 3) {
+      // Bottom-Right Quadrant
+      pos = { x: skillsData.core.x + 300, y: skillsData.core.y + 300 };
+    }
+
+    return {
+      ...category,
+      x: pos.x,
+      y: pos.y,
+      skills: category.skills.map((skill, skillIndex) => {
+        const skillPos = calculatePosition(
+          pos.x,
+          pos.y,
+          skillIndex,
+          category.skills.length,
+          220
+        ); // Radius for skills
+        return {
+          ...skill,
+          x: skillPos.x,
+          y: skillPos.y,
+          size: 60,
+        };
+      }),
+    };
+  });
+
+  return skillsData;
+};
+
+
 const Skills = () => {
   const [activeSkill, setActiveSkill] = useState(null);
+  const processedData = processSkillsData();
   
   const drawConnections = () => {
     const connections = [];
-    
-    // Draw connections from core to main categories
-    skillsData.core.connections.forEach(targetId => {
-      const target = skillsData.skills.find(s => s.id === targetId);
+  
+    // Draw connections from core to categories
+    processedData.categories.forEach((category) => {
+      // Get edge points for core and category
+      const coreTopPoint = getHexagonEdgePoint(
+        processedData.core.x,
+        processedData.core.y,
+        processedData.core.size,
+        'top'
+      );
+      const categoryBottomPoint = getHexagonEdgePoint(
+        category.x,
+        category.y,
+        category.size,
+        'bottom'
+      );
+  
       connections.push(
         <line
-          key={`core-${targetId}`}
-          x1={skillsData.core.x}
-          y1={skillsData.core.y}
-          x2={target.x}
-          y2={target.y}
+          key={`core-${category.id}`}
+          x1={coreTopPoint.x}
+          y1={coreTopPoint.y}
+          x2={categoryBottomPoint.x}
+          y2={categoryBottomPoint.y}
           stroke="#4a5568"
-          strokeWidth="2"
+          strokeWidth="3"
           strokeDasharray="5,5"
         />
       );
+  
+      // Draw connections from categories to their skills
+      category.skills.forEach((skill) => {
+        const categoryTopPoint = getHexagonEdgePoint(
+          category.x,
+          category.y,
+          category.size,
+          'top'
+        );
+        const skillBottomPoint = getHexagonEdgePoint(
+          skill.x,
+          skill.y,
+          skill.size,
+          'bottom'
+        );
+  
+        connections.push(
+          <line
+            key={`${category.id}-${skill.id}`}
+            x1={categoryTopPoint.x}
+            y1={categoryTopPoint.y}
+            x2={skillBottomPoint.x}
+            y2={skillBottomPoint.y}
+            stroke="#4a5568"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
+        );
+      });
     });
-    
-    // Draw connections between skills
-    skillsData.skills.forEach(skill => {
-      if (skill.connections) {
-        skill.connections.forEach(targetId => {
-          const target = skillsData.skills.find(s => s.id === targetId);
-          connections.push(
-            <line
-              key={`${skill.id}-${targetId}`}
-              x1={skill.x}
-              y1={skill.y}
-              x2={target.x}
-              y2={target.y}
-              stroke="#4a5568"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          );
-        });
-      }
-    });
-    
+  
     return connections;
   };
+  
 
   return (
-    <div id="skills" className="min-h-screen bg-gray-900 py-16 px-4 relative overflow-hidden">
+    // <div id="skills" className="min-h-screen bg-gradient-to-r from-[#1b4339] to-[#52b788] py-12 px-4 relative overflow-hidden">
+    <div id="skills" className="min-h-screen bg-white py-12 px-4 relative overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl font-bold text-center text-white mb-12"
         >
-          Skills Crystal Structure
+          Skills
         </motion.h1>
 
         {activeSkill && (
@@ -192,7 +224,7 @@ const Skills = () => {
             className="absolute top-4 right-4 bg-white/10 p-4 rounded-lg text-white max-w-xs"
           >
             <h3 className="text-xl mb-2">
-              {activeSkill.icon} {activeSkill.name}
+              {activeSkill.name}
               {activeSkill.level && (
                 <span className="ml-2 text-sm text-white/80">
                   Level: {activeSkill.level}%
@@ -203,69 +235,96 @@ const Skills = () => {
           </motion.div>
         )}
 
-        <svg width="800" height="600" className="mx-auto">
-          {/* Draw connections */}
+        <svg width="1200" height="1200" className="mx-auto">
           {drawConnections()}
           
-          {/* Draw core node */}
+          {/* Core Skills hexagon */}
           <motion.g
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
           >
             <polygon
-              points={createHexagonPoints(skillsData.core.x, skillsData.core.y, skillsData.core.size)}
-              fill="#4299e1"
+              points={createHexagonPoints(processedData.core.x, processedData.core.y, processedData.core.size)}
+              fill="white"
+              stroke="black" // Add black border
+              strokeWidth="2" // Adjust width for better visibility
               className="cursor-pointer"
             />
             <text
-              x={skillsData.core.x}
-              y={skillsData.core.y}
+              x={processedData.core.x}
+              y={processedData.core.y}
               textAnchor="middle"
               dy=".3em"
-              fill="white"
-              fontSize="12"
+              fill="black"
+              fontSize="16"
+              fontWeight="bold"
             >
-              {skillsData.core.name}
+              {processedData.core.name}
             </text>
           </motion.g>
 
-          {/* Draw skill nodes */}
-          {skillsData.skills.map((skill, index) => (
-            <motion.g
-              key={skill.id}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              onMouseEnter={() => setActiveSkill(skill)}
-              onMouseLeave={() => setActiveSkill(null)}
-              className="cursor-pointer"
-            >
-              <polygon
-                points={createHexagonPoints(skill.x, skill.y, skill.size)}
-                fill={skill.level ? `hsl(200, 100%, ${skill.level}%)` : "#718096"}
-                className="transition-all duration-300 hover:opacity-80"
-                stroke="#ffffff33"
-                strokeWidth="1"
-              />
-              <text
-                x={skill.x}
-                y={skill.y - 5}
-                textAnchor="middle"
-                fill="white"
-                fontSize="12"
+          {/* Category hexagons */}
+          {processedData.categories.map((category, index) => (
+            <motion.g key={category.id}>
+              <motion.g
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.5 }}
+                onMouseEnter={() => setActiveSkill(category)}
+                onMouseLeave={() => setActiveSkill(null)}
+                className="cursor-pointer"
               >
-                {skill.icon}
-              </text>
-              <text
-                x={skill.x}
-                y={skill.y + 15}
-                textAnchor="middle"
-                fill="white"
-                fontSize="10"
-              >
-                {skill.name}
-              </text>
+                <polygon
+                  points={createHexagonPoints(category.x, category.y, category.size)}
+                  fill="white"
+                  className="transition-all duration-300 hover:opacity-80"
+                  stroke="black" // Add black border
+                  strokeWidth="2" // Adjust width for better visibility
+                  
+                />
+                <text
+                  x={category.x}
+                  y={category.y}
+                  textAnchor="middle"
+                  dy=".3em"
+                  fill="black"
+                  fontSize="14"
+                >
+                  {category.name}
+                </text>
+              </motion.g>
+
+              {/* Skill hexagons */}
+              {category.skills.map((skill, skillIndex) => (
+                <motion.g
+                  key={skill.id}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: (index * 0.1) + ((skillIndex + 1) * 0.1) }}
+                  onMouseEnter={() => setActiveSkill(skill)}
+                  onMouseLeave={() => setActiveSkill(null)}
+                  className="cursor-pointer"
+                >
+                  <polygon
+                    points={createHexagonPoints(skill.x, skill.y, skill.size)}
+                    fill="white"
+                    className="transition-all duration-300 hover:opacity-80"
+                    stroke="black"
+                    strokeWidth="2"
+                  />
+                  <text
+                    x={skill.x}
+                    y={skill.y}
+                    textAnchor="middle"
+                    dy=".3em"
+                    fill="black"
+                    fontSize="12"
+                  >
+                    {skill.name}
+                  </text>
+                </motion.g>
+              ))}
             </motion.g>
           ))}
         </svg>

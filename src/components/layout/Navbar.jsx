@@ -12,6 +12,7 @@ const Navbar = () => {
   };
 
   return (
+    
     <nav className="sticky top-0 z-50 bg-[#1b4339] shadow-md">
       <div className="fog-effect"></div>
       <div className="max-w-7xl mx-auto">
